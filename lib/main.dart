@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stateTrial/providers/LocationProvider.dart';
+import 'package:stateTrial/screens/SplashScreen.dart';
 import 'package:provider/provider.dart';
 import 'screens/TestScreen.dart';
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
           primaryColor: Colors.green[200],
           accentColor: Colors.green[500],
         ),
-        home: TestScreen(),
+        home: SplashScreen(),
       ),
     );
   }
