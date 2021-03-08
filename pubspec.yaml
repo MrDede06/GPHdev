@@ -34,6 +34,8 @@ dependencies:
   flutter_bounce: ^1.0.8
   geocoder: ^0.2.1
   google_fonts: ^1.1.1
+  flutter_google_places: ^0.2.8
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

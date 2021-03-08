@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:stateTrial/providers/LocationProvider.dart';
 import 'package:stateTrial/screens/SplashScreen.dart';
 import 'package:provider/provider.dart';
-import 'screens/TestScreen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

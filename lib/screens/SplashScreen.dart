@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stateTrial/screens/TestScreen.dart';
+import 'package:stateTrial/screens/MainScreen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -22,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   route() {
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => TestScreen()));
+        context, MaterialPageRoute(builder: (context) => MainScreen()));
   }
 
   @override

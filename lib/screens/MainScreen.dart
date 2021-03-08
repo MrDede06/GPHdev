@@ -5,9 +5,10 @@ import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
 import '../widgets/UserForm.dart';
+import '../widgets/SearchForm.dart';
 import '../widgets/MapView.dart';
 
-class TestScreen extends StatelessWidget {
+class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locData = Provider.of<LocationProvider>(context);
@@ -36,12 +37,10 @@ class TestScreen extends StatelessWidget {
         ),
         drawer: Drawer(
             elevation: 40,
-            child: Padding(
-              padding: EdgeInsets.only(top: 80),
-              child: SizedBox(
-                height: 100,
-                child: UserForm(),
-              ),
+            child: Column(
+              children: <Widget>[
+                SearchForm(),
+              ],
             )),
         body: MapView());
   }
