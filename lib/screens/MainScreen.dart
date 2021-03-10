@@ -7,24 +7,38 @@ import 'package:flutter_bounce/flutter_bounce.dart';
 import '../widgets/UserForm.dart';
 import '../widgets/SearchForm.dart';
 import '../widgets/MapView.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locData = Provider.of<LocationProvider>(context);
+
+    Future<void> _launchURL() async {
+      const url = 'https://flutter.io';
+      if (await canLaunch(url)) {
+        await launch(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    }
+
     return Scaffold(
         appBar: AppBar(
-          title: Center(
-            child: Container(
+          centerTitle: true,
+          title: Container(
+            child: Bounce(
               child: Image.asset("assets/images/logo1.png"),
-              height: 50,
+              onPressed: _launchURL,
+              duration: Duration(milliseconds: 100),
             ),
+            height: 50,
           ),
           shadowColor: Colors.black,
           backgroundColor: Colors.green[200],
           actions: <Widget>[
             Bounce(
-                duration: Duration(milliseconds: 200),
+                duration: Duration(milliseconds: 100),
                 onPressed: () {
                   print("Profile");
                 },

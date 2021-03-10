@@ -72,7 +72,7 @@ class _UserForm extends State<UserForm> {
               FocusScope.of(context).unfocus();
               _formKey.currentState.save();
               print(lattidute);
-              locData.updateLoc(lattidute, longitude, true);
+              locData.updateLocSource(lattidute, longitude);
             },
           ),
         ],

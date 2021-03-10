@@ -5,7 +5,6 @@ import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 import 'dart:async';
-import 'package:flutter_bounce/flutter_bounce.dart';
 
 class SearchForm extends StatefulWidget {
   @override
@@ -20,9 +19,11 @@ class _SearchFormState extends State<SearchForm> {
 
   @override
   Widget build(BuildContext context) {
+    final locData = Provider.of<LocationProvider>(context);
+    final mediaQuery = MediaQuery.of(context);
     return Container(
       width: double.infinity,
-      color: Colors.black54,
+      color: Colors.green[200],
       child: Card(
         color: Colors.green[200],
         child: Row(
@@ -30,81 +31,74 @@ class _SearchFormState extends State<SearchForm> {
             Padding(
               padding: EdgeInsets.only(right: 5),
             ),
-            Center(child: Icon(Icons.add_road_rounded)),
+            Center(
+                child: Icon(
+              Icons.add_road_rounded,
+              color: Colors.white,
+            )),
             Padding(
-              padding: EdgeInsets.only(right: 15),
+              padding: EdgeInsets.only(right: 10),
             ),
             Flexible(
               child: Column(
                 children: <Widget>[
                   SizedBox(
+                    height: mediaQuery.padding.top,
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                        hintText: addesIsSelected == false
+                            ? 'From:'.toString()
+                            : addressPred.description.toString(),
+                        focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white))),
+                    onTap: () async {
+                      Prediction p = await PlacesAutocomplete.show(
+                          mode: Mode.overlay,
+                          context: context,
+                          apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o');
+
+                      displayPrediction(p, locData);
+                      setState(() {
+                        addressPred = p;
+                      });
+                    },
+                  ),
+                  TextField(
+                    decoration: InputDecoration(
+                        hintText: addesIsSelectedDest == false
+                            ? 'To:'.toString()
+                            : addressPredDest.description.toString(),
+                        focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white))),
+                    onTap: () async {
+                      Prediction p = await PlacesAutocomplete.show(
+                          mode: Mode.overlay,
+                          context: context,
+                          apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o');
+
+                      displayPredictionDest(p, locData);
+                      setState(() {
+                        addressPredDest = p;
+                      });
+                    },
+                  ),
+                  SizedBox(
                     height: 30,
-                  ),
-                  Container(
-                    decoration:
-                        BoxDecoration(borderRadius: BorderRadius.circular(15)),
-                    child: RaisedButton(
-                      color: Colors.green[100],
-                      onPressed: () async {
-                        // show input autocomplete with selected mode
-                        // then get the Prediction selected
-
-                        Prediction p = await PlacesAutocomplete.show(
-                            mode: Mode.overlay,
-                            context: context,
-                            apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o');
-
-                        displayPrediction(p);
-                        setState(() {
-                          addressPred = p;
-                        });
-                      },
-                      child: addesIsSelected == false
-                          ? Text('Find address')
-                          : Text(
-                              addressPred.description,
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: false,
-                              //                           overflow: TextOverflow.ellipsis,
-                            ),
-                    ),
-                  ),
-                  Container(
-                    child: RaisedButton(
-                      color: Colors.green[100],
-                      onPressed: () async {
-                        // show input autocomplete with selected mode
-                        // then get the Prediction selected
-
-                        Prediction p = await PlacesAutocomplete.show(
-                            mode: Mode.overlay,
-                            context: context,
-                            apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o');
-
-                        displayPredictionDest(p);
-                        setState(() {
-                          addressPredDest = p;
-                        });
-                      },
-                      child: addesIsSelectedDest == false
-                          ? Text('Find address')
-                          : Text(
-                              addressPredDest.description,
-                              softWrap: false,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                    ),
-                  ),
+                  )
                 ],
               ),
             ),
+            Padding(
+              padding: EdgeInsets.only(right: 7),
+            )
           ],
         ),
       ),
     );
   }
 
-  Future<Null> displayPrediction(Prediction p) async {
+  Future<Null> displayPrediction(Prediction p, LocationProvider loc) async {
     setState(() {
       addesIsSelected = false;
     });
@@ -120,13 +114,14 @@ class _SearchFormState extends State<SearchForm> {
       setState(() {
         addesIsSelected = true;
       });
+      loc.updateLocSource(lat, lng);
       print(p.description);
       print(lat);
       print(lng);
     }
   }
 
-  Future<Null> displayPredictionDest(Prediction p) async {
+  Future<Null> displayPredictionDest(Prediction p, LocationProvider loc) async {
     setState(() {
       addesIsSelectedDest = false;
     });
@@ -142,6 +137,7 @@ class _SearchFormState extends State<SearchForm> {
       setState(() {
         addesIsSelectedDest = true;
       });
+      loc.updateLocDest(lat, lng);
       print(p.description);
       print(lat);
       print(lng);
