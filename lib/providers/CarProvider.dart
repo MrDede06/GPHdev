@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
 class Car {
+  int id;
   String name;
   double battery;
   int range;
   int efficieny;
-  String connectors;
-  int currentBattery;
+  List<dynamic> connectors;
+  double currentBattery;
   Car(
-      {this.name,
+      {this.id,
+      this.name,
       this.battery,
       this.range,
       this.efficieny,
@@ -18,23 +20,25 @@ class Car {
 
 class CarProvider with ChangeNotifier {
   Car car = Car(
+      id: 0,
       name: "",
       battery: 0,
       range: 0,
       efficieny: 0,
-      connectors: "",
+      connectors: [],
       currentBattery: 0);
 
-  void updateCarProperties(
-      String name, int battery, int range, int efficiensy, String connector) {
+  void updateCarProperties(int id, String name, int battery, int range,
+      int efficiensy, List<dynamic> connector) {
     car.name = name;
     car.range = range;
     car.efficieny = efficiensy;
     car.connectors = connector;
+    car.id = id;
     notifyListeners();
   }
 
-  void updateCurrentBattery(int currentBattery) {
+  void updateCurrentBattery(double currentBattery) {
     car.currentBattery = currentBattery;
     notifyListeners();
   }

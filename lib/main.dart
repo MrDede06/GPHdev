@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stateTrial/providers/LocationProvider.dart';
+import 'package:stateTrial/providers/CarProvider.dart';
 import 'package:stateTrial/screens/SplashScreen.dart';
 import 'package:provider/provider.dart';
 
@@ -15,8 +16,15 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => LocationProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(
+          value: LocationProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: CarProvider(),
+        ),
+      ],
       child: MaterialApp(
         title: 'Green Power Hunters',
         theme: ThemeData(

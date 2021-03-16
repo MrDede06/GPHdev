@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stateTrial/providers/LocationProvider.dart';
+import 'package:stateTrial/providers/CarProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,6 +15,7 @@ class _CarSearchState extends State<CarSearch> {
   List<String> cars = new List<String>();
   List<String> carss = new List<String>();
   List<dynamic> loadedData;
+  double _currentSliderValue = 0;
   var value;
 
   @override
@@ -51,7 +52,7 @@ class _CarSearchState extends State<CarSearch> {
 
   @override
   Widget build(BuildContext context) {
-//    final carData = Provider.of<CarProvider>(context);
+    final carData = Provider.of<CarProvider>(context);
     final mediaQuery = MediaQuery.of(context);
     return Container(
       width: double.infinity,
@@ -72,16 +73,37 @@ class _CarSearchState extends State<CarSearch> {
           Flexible(
             child: Column(
               children: <Widget>[
+                SizedBox(
+                  height: 5,
+                ),
                 DropdownButton(
                   isExpanded: true,
+                  underline: Container(
+                    height: 0.9,
+                    color: Colors.black45,
+                  ),
+                  focusColor: Colors.white,
                   hint: Text(
-                    "Select the car",
+                    "Car",
+                    style: TextStyle(color: Colors.black54),
                   ),
                   value: value,
                   onChanged: (newValue) {
                     setState(() {
                       value = newValue;
                     });
+
+                    final selectedCar = loadedData
+                        .where((index) => index['name'] == value)
+                        .toList();
+
+                    carData.updateCarProperties(
+                        selectedCar[0]['id'],
+                        selectedCar[0]['name'],
+                        selectedCar[0]['totalBattery'],
+                        selectedCar[0]['totalRange'],
+                        selectedCar[0]['avgUsagePerKm'],
+                        selectedCar[0]['connectors']);
                   },
                   items: cars.map((valueItem) {
                     return DropdownMenuItem(
@@ -91,6 +113,26 @@ class _CarSearchState extends State<CarSearch> {
                   }).toList(),
                   icon: Icon(Icons.arrow_drop_down),
                 ),
+                Text(
+                  "Current Battery",
+                  textAlign: TextAlign.left,
+                ),
+                Slider(
+                    value: _currentSliderValue,
+                    min: 0,
+                    max: 100,
+                    divisions: 100,
+                    activeColor: Colors.black45,
+                    inactiveColor: Colors.black45,
+                    label: _currentSliderValue.round().toString() + "%",
+                    onChanged: (double value) {
+                      setState(() {
+                        _currentSliderValue = value;
+                      });
+                    },
+                    onChangeEnd: (double value) {
+                      carData.updateCurrentBattery(value);
+                    }),
                 SizedBox(
                   height: 30,
                 ),
