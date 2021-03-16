@@ -8,6 +8,7 @@ import '../widgets/UserForm.dart';
 import '../widgets/SearchForm.dart';
 import '../widgets/MapView.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/CarSearch.dart';
 
 class MainScreen extends StatelessWidget {
   @override
@@ -15,7 +16,8 @@ class MainScreen extends StatelessWidget {
     final locData = Provider.of<LocationProvider>(context);
 
     Future<void> _launchURL() async {
-      const url = 'https://flutter.io';
+      const url =
+          'http://green-power-hunters.s3-website.eu-central-1.amazonaws.com/';
       if (await canLaunch(url)) {
         await launch(url);
       } else {
@@ -52,9 +54,7 @@ class MainScreen extends StatelessWidget {
         drawer: Drawer(
             elevation: 40,
             child: Column(
-              children: <Widget>[
-                SearchForm(),
-              ],
+              children: <Widget>[SearchForm(), CarSearch()],
             )),
         body: MapView());
   }

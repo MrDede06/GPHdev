@@ -36,6 +36,7 @@ dependencies:
   google_fonts: ^1.1.1
   flutter_google_places: ^0.2.8
   url_launcher: ^5.7.10
+  flutter_polyline_points: ^0.2.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

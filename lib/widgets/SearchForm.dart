@@ -24,76 +24,84 @@ class _SearchFormState extends State<SearchForm> {
     return Container(
       width: double.infinity,
       color: Colors.green[200],
-      child: Card(
-        color: Colors.green[200],
-        child: Row(
-          children: [
-            Padding(
-              padding: EdgeInsets.only(right: 5),
-            ),
-            Center(
-                child: Icon(
-              Icons.add_road_rounded,
-              color: Colors.white,
-            )),
-            Padding(
-              padding: EdgeInsets.only(right: 10),
-            ),
-            Flexible(
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: mediaQuery.padding.top,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                        hintText: addesIsSelected == false
-                            ? 'From:'.toString()
-                            : addressPred.description.toString(),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white))),
-                    onTap: () async {
-                      Prediction p = await PlacesAutocomplete.show(
-                          mode: Mode.overlay,
-                          context: context,
-                          apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o');
+      child: Row(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(right: 5),
+          ),
+          Center(
+              child: Icon(
+            Icons.add_road_rounded,
+            color: Colors.white,
+          )),
+          Padding(
+            padding: EdgeInsets.only(right: 10),
+          ),
+          Flexible(
+            child: Column(
+              children: <Widget>[
+                SizedBox(
+                  height: mediaQuery.padding.top,
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      hintText: addesIsSelected == false
+                          ? 'From:'.toString()
+                          : addressPred.description.toString(),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white))),
+                  onTap: () async {
+                    Prediction p = await PlacesAutocomplete.show(
+                        mode: Mode.overlay,
+                        context: context,
+                        apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o');
 
-                      displayPrediction(p, locData);
-                      setState(() {
-                        addressPred = p;
-                      });
-                    },
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                        hintText: addesIsSelectedDest == false
-                            ? 'To:'.toString()
-                            : addressPredDest.description.toString(),
-                        focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white))),
-                    onTap: () async {
-                      Prediction p = await PlacesAutocomplete.show(
-                          mode: Mode.overlay,
-                          context: context,
-                          apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o');
+                    displayPrediction(p, locData);
+                    setState(() {
+                      addressPred = p;
+                    });
+                  },
+                ),
+                TextField(
+                  decoration: InputDecoration(
+                      hintText: addesIsSelectedDest == false
+                          ? 'To:'.toString()
+                          : addressPredDest.description.toString(),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white))),
+                  onTap: () async {
+                    Prediction p = await PlacesAutocomplete.show(
+                        mode: Mode.overlay,
+                        context: context,
+                        apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o');
 
-                      displayPredictionDest(p, locData);
-                      setState(() {
-                        addressPredDest = p;
-                      });
-                    },
-                  ),
-                  SizedBox(
-                    height: 30,
+                    displayPredictionDest(p, locData);
+                    setState(() {
+                      addressPredDest = p;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 30,
+                ),
+                /*
+                  Center(
+                    child: InkWell(
+                      child: Icon(Icons.search),
+                      onTap: () {
+                        // ignore: unnecessary_statements
+                        locData.toggleSelected();
+                      },
+                    ),
                   )
-                ],
-              ),
+                  */
+              ],
             ),
-            Padding(
-              padding: EdgeInsets.only(right: 7),
-            )
-          ],
-        ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: 7),
+          )
+        ],
       ),
     );
   }
@@ -102,6 +110,7 @@ class _SearchFormState extends State<SearchForm> {
     setState(() {
       addesIsSelected = false;
     });
+
     if (p != null) {
       GoogleMapsPlaces _places = GoogleMapsPlaces(
         apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o',
