@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 class Car {
   int id;
   String name;
-  double battery;
+  int battery;
   int range;
   int efficieny;
   List<dynamic> connectors;
   double currentBattery;
+  bool isCarSelected;
   Car(
       {this.id,
       this.name,
@@ -15,7 +16,8 @@ class Car {
       this.range,
       this.efficieny,
       this.connectors,
-      this.currentBattery});
+      this.currentBattery,
+      this.isCarSelected});
 }
 
 class CarProvider with ChangeNotifier {
@@ -26,7 +28,8 @@ class CarProvider with ChangeNotifier {
       range: 0,
       efficieny: 0,
       connectors: [],
-      currentBattery: 0);
+      currentBattery: 0,
+      isCarSelected: false);
 
   void updateCarProperties(int id, String name, int battery, int range,
       int efficiensy, List<dynamic> connector) {
@@ -34,6 +37,7 @@ class CarProvider with ChangeNotifier {
     car.range = range;
     car.efficieny = efficiensy;
     car.connectors = connector;
+    car.battery = battery;
     car.id = id;
     notifyListeners();
   }
@@ -41,5 +45,9 @@ class CarProvider with ChangeNotifier {
   void updateCurrentBattery(double currentBattery) {
     car.currentBattery = currentBattery;
     notifyListeners();
+  }
+
+  void toggleIsCarSelected() {
+    car.isCarSelected = !car.isCarSelected;
   }
 }

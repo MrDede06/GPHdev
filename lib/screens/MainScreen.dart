@@ -5,6 +5,7 @@ import 'package:location/location.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
 import '../widgets/UserForm.dart';
+import '../widgets/InfoTabMenus.dart';
 import '../widgets/SearchForm.dart';
 import '../widgets/MapView.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -54,7 +55,7 @@ class MainScreen extends StatelessWidget {
         drawer: Drawer(
             elevation: 40,
             child: Column(
-              children: <Widget>[SearchForm(), CarSearch()],
+              children: <Widget>[SearchForm(), CarSearch(), InfoTabMenus()],
             )),
         body: MapView());
   }

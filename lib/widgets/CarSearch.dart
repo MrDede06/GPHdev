@@ -54,6 +54,7 @@ class _CarSearchState extends State<CarSearch> {
   Widget build(BuildContext context) {
     final carData = Provider.of<CarProvider>(context);
     final mediaQuery = MediaQuery.of(context);
+
     return Container(
       width: double.infinity,
       color: Colors.green[300],
@@ -72,6 +73,7 @@ class _CarSearchState extends State<CarSearch> {
           ),
           Flexible(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 SizedBox(
                   height: 5,
@@ -113,28 +115,45 @@ class _CarSearchState extends State<CarSearch> {
                   }).toList(),
                   icon: Icon(Icons.arrow_drop_down),
                 ),
+                SizedBox(
+                  height: 5,
+                ),
                 Text(
                   "Current Battery",
                   textAlign: TextAlign.left,
+                  style: TextStyle(color: Colors.black54, fontSize: 15),
                 ),
-                Slider(
-                    value: _currentSliderValue,
-                    min: 0,
-                    max: 100,
-                    divisions: 100,
-                    activeColor: Colors.black45,
-                    inactiveColor: Colors.black45,
-                    label: _currentSliderValue.round().toString() + "%",
-                    onChanged: (double value) {
-                      setState(() {
-                        _currentSliderValue = value;
-                      });
-                    },
-                    onChangeEnd: (double value) {
-                      carData.updateCurrentBattery(value);
-                    }),
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    activeTrackColor: Colors.black54,
+                    inactiveTrackColor: Colors.black45,
+                    trackHeight: 1.0,
+                    thumbColor: Colors.black54,
+                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.0),
+                    overlayColor: Colors.purple.withAlpha(32),
+                    overlayShape: RoundSliderOverlayShape(overlayRadius: 14.0),
+                  ),
+                  child: Slider(
+                      value: _currentSliderValue,
+                      min: 0,
+                      max: 100,
+                      divisions: 100,
+                      // activeColor: Colors.black45,
+                      //inactiveColor: Colors.black45,
+                      label: _currentSliderValue.round().toString() + "%",
+                      onChanged: (double value) {
+                        setState(() {
+                          _currentSliderValue = value;
+                        });
+                      },
+                      onChangeEnd: (double value) {
+                        setState(() {
+                          carData.updateCurrentBattery(value);
+                        });
+                      }),
+                ),
                 SizedBox(
-                  height: 30,
+                  height: 15,
                 ),
               ],
             ),
