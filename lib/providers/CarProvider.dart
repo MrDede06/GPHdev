@@ -49,5 +49,6 @@ class CarProvider with ChangeNotifier {
 
   void toggleIsCarSelected() {
     car.isCarSelected = !car.isCarSelected;
+    notifyListeners();
   }
 }

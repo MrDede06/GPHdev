@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:stateTrial/providers/CarProvider.dart';
+import 'package:stateTrial/providers/LocationProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_bounce/flutter_bounce.dart';
 
 class CarSearch extends StatefulWidget {
   @override
@@ -53,7 +55,21 @@ class _CarSearchState extends State<CarSearch> {
   @override
   Widget build(BuildContext context) {
     final carData = Provider.of<CarProvider>(context);
+    final locData = Provider.of<LocationProvider>(context);
     final mediaQuery = MediaQuery.of(context);
+    bool toogleSearch = false;
+
+    bool _checkIfParamatersSelected(
+        LocationProvider locData, CarProvider carData) {
+      if (locData.loc.lattidute != 37.785834 &&
+          locData.loc.lattiduteDest != 51.5266 &&
+          carData.car.id != 0 &&
+          carData.car.currentBattery != 0 &&
+          carData.car.isCarSelected == false)
+        return true;
+      else
+        return false;
+    }
 
     return Container(
       width: double.infinity,
@@ -155,6 +171,21 @@ class _CarSearchState extends State<CarSearch> {
                 SizedBox(
                   height: 15,
                 ),
+                /*
+                _checkIfParamatersSelected(locData, carData) == true
+                    ? Center(
+                        child: Bounce(
+                          child: Icon(Icons.search),
+                          duration: Duration(milliseconds: 100),
+                          onPressed: () {
+                            setState(() {
+                              locData.toggleSelected();
+                              carData.toggleIsCarSelected();
+                            });
+                          },
+                        ),
+                      )
+                    : Container() */
               ],
             ),
           ),

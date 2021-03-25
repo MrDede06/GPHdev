@@ -120,6 +120,7 @@ class _SearchFormState extends State<SearchForm> {
           await _places.getDetailsByPlaceId(p.placeId);
       final lat = detail.result.geometry.location.lat;
       final lng = detail.result.geometry.location.lng;
+
       setState(() {
         addesIsSelected = true;
       });
@@ -143,6 +144,7 @@ class _SearchFormState extends State<SearchForm> {
           await _places.getDetailsByPlaceId(p.placeId);
       final lat = detail.result.geometry.location.lat;
       final lng = detail.result.geometry.location.lng;
+
       setState(() {
         addesIsSelectedDest = true;
       });

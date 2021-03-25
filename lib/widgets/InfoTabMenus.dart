@@ -9,14 +9,6 @@ class InfoTabMenus extends StatefulWidget {
 
 class _InfoTabMenusState extends State<InfoTabMenus>
     with TickerProviderStateMixin {
-  /*
-  TabController _tabController;
-  @override
-  void initState() {
-    _tabController = new TabController(length: 3, vsync: this);
-    super.initState();
-  }
-  */
   @override
   Widget build(BuildContext context) {
     final carData = Provider.of<CarProvider>(context);
