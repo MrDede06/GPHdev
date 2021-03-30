@@ -18,10 +18,13 @@ class MapView extends StatefulWidget {
 class _MapView extends State<MapView> {
   Completer<GoogleMapController> _controller = Completer();
   Set<Marker> markers = Set();
+  Set<Marker> markers_src_dst = Set();
   final List<LatLng> markerLocations = [];
   PolylinePoints polylinePoints;
   Map<PolylineId, Polyline> polylines = {};
   List<LatLng> polylineCoordinates = [];
+  List<PointLatLng> funcPolyCoordinates = [];
+  List<LatLng> realpolylineCoordinates = [];
 
   final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(51.107883, 17.038538),
@@ -45,6 +48,9 @@ class _MapView extends State<MapView> {
       //
       */
       _getBackEndParameters(locData, carData);
+      print("count debug");
+      _createPolylines(locData.loc.lattidute, locData.loc.longitude,
+          locData.loc.lattiduteDest, locData.loc.longitudeDest, locData);
 
       // locData.toggleSelected();
     }
@@ -82,8 +88,8 @@ class _MapView extends State<MapView> {
     markers.add(destMarker);
   }
 
-  _createPolylines(double latSource, double longSource, double latDest,
-      double longDest, LocationProvider data) async {
+  Future<void> _createPolylines(double lattidute, double longtidute,
+      double latiduteDest, double longtiduteDest, LocationProvider data) async {
     // Initializing PolylinePoints
     polylinePoints = PolylinePoints();
 
@@ -91,12 +97,13 @@ class _MapView extends State<MapView> {
     // drawing the polylines
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o', // Google Maps API Key
-      PointLatLng(latSource, longSource),
-      PointLatLng(latDest, longDest),
+      PointLatLng(lattidute, longtidute),
+      PointLatLng(latiduteDest, longtiduteDest),
       travelMode: TravelMode.transit,
     );
-    print(result.points);
+    //print(result.points);
     // Adding the coordinates to the list
+
     if (result.points.isNotEmpty) {
       result.points.forEach((PointLatLng point) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
@@ -116,21 +123,21 @@ class _MapView extends State<MapView> {
 
     // Adding the polyline to the map
 
-    setState(() {
-      polylines[id] = polyline;
-    });
+    polylines[id] = polyline;
 
+    /*
     final GoogleMapController controller = await _controller.future;
+
     controller.animateCamera(
       CameraUpdate.newLatLngBounds(
         LatLngBounds(
-          northeast: LatLng(
-            latSource,
-            longSource,
-          ),
           southwest: LatLng(
-            latDest,
-            longDest,
+            data.loc.lattidute,
+            data.loc.longitude,
+          ),
+          northeast: LatLng(
+            data.loc.lattiduteDest,
+            data.loc.longitudeDest,
           ),
         ),
         100.0, // padding
@@ -138,7 +145,7 @@ class _MapView extends State<MapView> {
     );
     setState(() {
       data.toggleSelected();
-    });
+    }); */
   }
 
   Future<void> _getBackEndParameters(
@@ -160,7 +167,8 @@ class _MapView extends State<MapView> {
 
     var jsonParam = {
       "car": {
-        "id": carData.car.id,
+        //       "id": carData.car.id,
+        "id": 3,
         "currentBatteryPercentage": carData.car.currentBattery.toInt()
       },
       "route": {
@@ -183,49 +191,82 @@ class _MapView extends State<MapView> {
 
     List<dynamic> responseJson2 = json.decode(response2.body);
 
-    print(responseJson2.length);
+    //print(responseJson2.length);
     int i = 0;
+    funcPolyCoordinates
+        .add(PointLatLng(locData.loc.lattidute, locData.loc.longitude));
     while (i < responseJson2.length) {
       markerLocations.add(LatLng(responseJson2[i]["AddressInfo"]["Latitude"],
           responseJson2[i]["AddressInfo"]["Longitude"]));
-      polylineCoordinates.add(LatLng(
+
+      funcPolyCoordinates.add(PointLatLng(
           responseJson2[i]["AddressInfo"]["Latitude"],
           responseJson2[i]["AddressInfo"]["Longitude"]));
-      //print(responseJson2[i]["AddressInfo"]["Latitude"]);
       i++;
     }
+    funcPolyCoordinates
+        .add(PointLatLng(locData.loc.lattiduteDest, locData.loc.longitudeDest));
     for (LatLng markerLocation in markerLocations) {
-      markers.add(
-        Marker(
-          markerId:
-              MarkerId(markerLocations.indexOf(markerLocation).toString()),
-          position: markerLocation,
-          // icon: markerImage,
-        ),
-      );
+      setState(() {
+        markers.add(
+          Marker(
+            markerId:
+                MarkerId(markerLocations.indexOf(markerLocation).toString()),
+            position: markerLocation,
+            icon:
+                BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
+          ),
+        );
+      });
     }
-    PolylineId id = PolylineId('poly');
-
-    // Initializing Polyline
-    Polyline polyline = Polyline(
-      polylineId: id,
-      color: Colors.red,
-      points: polylineCoordinates,
-      width: 3,
-    );
     setState(() {
-      polylines[id] = polyline;
+      addMarker(locData.loc.lattidute, locData.loc.longitude,
+          locData.loc.lattiduteDest, locData.loc.longitudeDest);
     });
+    /*
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(locData.loc.lattidute, locData.loc.longitude),
+        zoom: 6))); */
+
+    final GoogleMapController controller = await _controller.future;
+    List<LatLng> _targetCord = [
+      LatLng(locData.loc.lattidute, locData.loc.longitude),
+      LatLng(locData.loc.lattiduteDest, locData.loc.longitudeDest)
+    ];
+    controller.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        boundsFromLatLngList(_targetCord),
+        50.0, // padding
+      ),
+    );
   }
 
   bool _checkIfParamatersSelected(
       LocationProvider locData, CarProvider carData) {
     if (locData.loc.lattidute != 37.785834 &&
         locData.loc.lattiduteDest != 51.5266 &&
-        carData.car.id != 0 &&
+        carData.car.id != 1 &&
         carData.car.currentBattery != 0)
       return true;
     else
       return false;
+  }
+
+  LatLngBounds boundsFromLatLngList(List<LatLng> list) {
+    assert(list.isNotEmpty);
+    double x0, x1, y0, y1;
+    for (LatLng latLng in list) {
+      if (x0 == null) {
+        x0 = x1 = latLng.latitude;
+        y0 = y1 = latLng.longitude;
+      } else {
+        if (latLng.latitude > x1) x1 = latLng.latitude;
+        if (latLng.latitude < x0) x0 = latLng.latitude;
+        if (latLng.longitude > y1) y1 = latLng.longitude;
+        if (latLng.longitude < y0) y0 = latLng.longitude;
+      }
+    }
+    return LatLngBounds(northeast: LatLng(x1, y1), southwest: LatLng(x0, y0));
   }
 }
