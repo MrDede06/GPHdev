@@ -20,7 +20,10 @@ class _MapView extends State<MapView> {
   Set<Marker> markers = Set();
   Set<Marker> markers_src_dst = Set();
   final List<LatLng> markerLocations = [];
-  PolylinePoints polylinePoints;
+
+  PolylinePoints polylinePoints = PolylinePoints();
+  Set<Polyline> _polylines = {};
+
   Map<PolylineId, Polyline> polylines = {};
   List<LatLng> polylineCoordinates = [];
   List<PointLatLng> funcPolyCoordinates = [];
@@ -52,14 +55,14 @@ class _MapView extends State<MapView> {
       _createPolylines(locData.loc.lattidute, locData.loc.longitude,
           locData.loc.lattiduteDest, locData.loc.longitudeDest, locData);
 
-      // locData.toggleSelected();
+      locData.loc.isSelected = true;
     }
 
     return GoogleMap(
       myLocationEnabled: true,
       initialCameraPosition: _kGooglePlex,
       mapType: MapType.normal,
-      polylines: Set<Polyline>.of(polylines.values),
+      polylines: _polylines,
       onMapCreated: (GoogleMapController controller) {
         _controller.complete(controller);
       },
@@ -109,21 +112,20 @@ class _MapView extends State<MapView> {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       });
     }
-
+    print("create polyline");
     // Defining an ID
-    PolylineId id = PolylineId('poly');
 
-    // Initializing Polyline
+    // create a Polyline instance
+    // with an id, an RGB color and the list of LatLng pairs
     Polyline polyline = Polyline(
-      polylineId: id,
-      color: Colors.red,
-      points: polylineCoordinates,
-      width: 3,
-    );
+        polylineId: PolylineId("poly"),
+        color: Color.fromARGB(255, 40, 122, 198),
+        points: polylineCoordinates);
 
-    // Adding the polyline to the map
-
-    polylines[id] = polyline;
+    // add the constructed polyline as a set of points
+    // to the polyline set, which will eventually
+    // end up showing up on the map
+    _polylines.add(polyline);
 
     /*
     final GoogleMapController controller = await _controller.future;
@@ -240,6 +242,7 @@ class _MapView extends State<MapView> {
         50.0, // padding
       ),
     );
+    print("get back end parameters");
   }
 
   bool _checkIfParamatersSelected(
@@ -247,7 +250,8 @@ class _MapView extends State<MapView> {
     if (locData.loc.lattidute != 37.785834 &&
         locData.loc.lattiduteDest != 51.5266 &&
         carData.car.id != 1 &&
-        carData.car.currentBattery != 0)
+        carData.car.currentBattery != 0 &&
+        locData.loc.isSelected == false)
       return true;
     else
       return false;
