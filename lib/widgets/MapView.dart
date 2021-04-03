@@ -20,7 +20,7 @@ class _MapView extends State<MapView> {
   Set<Marker> markers = Set();
   Set<Marker> markers_src_dst = Set();
   final List<LatLng> markerLocations = [];
-
+  List<PointLatLng> totalCordCollection = [];
   PolylinePoints polylinePoints = PolylinePoints();
   Set<Polyline> _polylines = {};
 
@@ -38,22 +38,11 @@ class _MapView extends State<MapView> {
     final locData = Provider.of<LocationProvider>(context);
     final carData = Provider.of<CarProvider>(context);
 
-    //if (locData.loc.isSelected == true)
     if (_checkIfParamatersSelected(locData, carData) == true) {
-//      _updateTheMap(locData.loc.lattidute, locData.loc.longitude);
-      /*
-      addMarker(locData.loc.lattidute, locData.loc.longitude,
-          locData.loc.lattiduteDest, locData.loc.longitudeDest);
-      _createPolylines(locData.loc.lattidute, locData.loc.longitude,
-          locData.loc.lattiduteDest, locData.loc.longitudeDest, locData);
-      // ignore: unnecessary_statements
-
-      //
-      */
       _getBackEndParameters(locData, carData);
       print("count debug");
-      _createPolylines(locData.loc.lattidute, locData.loc.longitude,
-          locData.loc.lattiduteDest, locData.loc.longitudeDest, locData);
+      // _createPolylines(locData.loc.lattidute, locData.loc.longitude,
+      //   locData.loc.lattiduteDest, locData.loc.longitudeDest, locData);
 
       locData.loc.isSelected = true;
     }
@@ -68,12 +57,6 @@ class _MapView extends State<MapView> {
       },
       markers: markers,
     );
-  }
-
-  Future<void> _updateTheMap(double lat, double long) async {
-    final GoogleMapController controller = await _controller.future;
-    controller.moveCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: LatLng(lat, long), zoom: 15)));
   }
 
   void addMarker(double lat, double long, double latDest, double longDest) {
@@ -91,63 +74,59 @@ class _MapView extends State<MapView> {
     markers.add(destMarker);
   }
 
-  Future<void> _createPolylines(double lattidute, double longtidute,
-      double latiduteDest, double longtiduteDest, LocationProvider data) async {
+  Future<void> _createPolylines(
+      double lattidute,
+      double longtidute,
+      double latiduteDest,
+      double longtiduteDest,
+      LocationProvider data,
+      List<PointLatLng> funcPolyCoordinates) async {
     // Initializing PolylinePoints
     polylinePoints = PolylinePoints();
 
     // Generating the list of coordinates to be used for
     // drawing the polylines
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o', // Google Maps API Key
-      PointLatLng(lattidute, longtidute),
-      PointLatLng(latiduteDest, longtiduteDest),
-      travelMode: TravelMode.transit,
-    );
+    print("funcpolycoordinates:");
+    print(funcPolyCoordinates);
+
+    int i = 0;
+    print(funcPolyCoordinates.length);
+    print(funcPolyCoordinates);
+    while (i < funcPolyCoordinates.length - 1) {
+      PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+        'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o', // Google Maps API Key
+        PointLatLng(
+            funcPolyCoordinates[i].latitude, funcPolyCoordinates[i].longitude),
+        PointLatLng(funcPolyCoordinates[i + 1].latitude,
+            funcPolyCoordinates[i + 1].longitude),
+        travelMode: TravelMode.driving,
+      );
+      totalCordCollection += result.points;
+
+      print("--------");
+      print(totalCordCollection.length);
+      print(result.points.length);
+      print(result.status);
+      print(result.errorMessage);
+      print("--------");
+
+      i++;
+    }
     //print(result.points);
     // Adding the coordinates to the list
-
-    if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
+    print("create polyline");
+    if (totalCordCollection.isNotEmpty) {
+      totalCordCollection.forEach((PointLatLng point) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
       });
     }
-    print("create polyline");
-    // Defining an ID
-
-    // create a Polyline instance
-    // with an id, an RGB color and the list of LatLng pairs
-    Polyline polyline = Polyline(
-        polylineId: PolylineId("poly"),
-        color: Color.fromARGB(255, 40, 122, 198),
-        points: polylineCoordinates);
-
-    // add the constructed polyline as a set of points
-    // to the polyline set, which will eventually
-    // end up showing up on the map
-    _polylines.add(polyline);
-
-    /*
-    final GoogleMapController controller = await _controller.future;
-
-    controller.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        LatLngBounds(
-          southwest: LatLng(
-            data.loc.lattidute,
-            data.loc.longitude,
-          ),
-          northeast: LatLng(
-            data.loc.lattiduteDest,
-            data.loc.longitudeDest,
-          ),
-        ),
-        100.0, // padding
-      ),
-    );
     setState(() {
-      data.toggleSelected();
-    }); */
+      Polyline polyline = Polyline(
+          polylineId: PolylineId("poly"),
+          color: Color.fromARGB(255, 40, 122, 198),
+          points: polylineCoordinates);
+      _polylines.add(polyline);
+    });
   }
 
   Future<void> _getBackEndParameters(
@@ -169,8 +148,7 @@ class _MapView extends State<MapView> {
 
     var jsonParam = {
       "car": {
-        //       "id": carData.car.id,
-        "id": 3,
+        "id": carData.car.id,
         "currentBatteryPercentage": carData.car.currentBattery.toInt()
       },
       "route": {
@@ -195,6 +173,7 @@ class _MapView extends State<MapView> {
 
     //print(responseJson2.length);
     int i = 0;
+
     funcPolyCoordinates
         .add(PointLatLng(locData.loc.lattidute, locData.loc.longitude));
     while (i < responseJson2.length) {
@@ -208,7 +187,9 @@ class _MapView extends State<MapView> {
     }
     funcPolyCoordinates
         .add(PointLatLng(locData.loc.lattiduteDest, locData.loc.longitudeDest));
+
     for (LatLng markerLocation in markerLocations) {
+      print(markerLocation);
       setState(() {
         markers.add(
           Marker(
@@ -225,11 +206,6 @@ class _MapView extends State<MapView> {
       addMarker(locData.loc.lattidute, locData.loc.longitude,
           locData.loc.lattiduteDest, locData.loc.longitudeDest);
     });
-    /*
-    final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: LatLng(locData.loc.lattidute, locData.loc.longitude),
-        zoom: 6))); */
 
     final GoogleMapController controller = await _controller.future;
     List<LatLng> _targetCord = [
@@ -239,10 +215,17 @@ class _MapView extends State<MapView> {
     controller.animateCamera(
       CameraUpdate.newLatLngBounds(
         boundsFromLatLngList(_targetCord),
-        50.0, // padding
+        70.0, // padding
       ),
     );
     print("get back end parameters");
+    _createPolylines(
+        locData.loc.lattidute,
+        locData.loc.longitude,
+        locData.loc.lattiduteDest,
+        locData.loc.longitudeDest,
+        locData,
+        funcPolyCoordinates);
   }
 
   bool _checkIfParamatersSelected(
@@ -272,5 +255,16 @@ class _MapView extends State<MapView> {
       }
     }
     return LatLngBounds(northeast: LatLng(x1, y1), southwest: LatLng(x0, y0));
+  }
+
+  Future<PolylineResult> getPointsPoly(
+      PointLatLng source, PointLatLng dest) async {
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o', // Google Maps API Key
+      PointLatLng(source.latitude, source.longitude),
+      PointLatLng(dest.latitude, dest.longitude),
+      travelMode: TravelMode.transit,
+    );
+    return result;
   }
 }
