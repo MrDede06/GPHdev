@@ -48,59 +48,11 @@ class MainScreen extends StatelessWidget {
             Bounce(
                 duration: Duration(milliseconds: 100),
                 onPressed: () async {
-                  sourceLat = locData.loc.lattidute;
-                  sourceLong = locData.loc.longitude;
-                  destLat = locData.loc.lattiduteDest;
-                  destLong = locData.loc.longitudeDest;
-                  url =
-                      "https://maps.googleapis.com/maps/api/directions/json?origin=$sourceLat,$sourceLong&destination=$destLat,$destLong&key=AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o";
-                  var response = await http.get(url);
-                  Map<String, dynamic> responseJson =
-                      json.decode(response.body);
-                  List<dynamic> routes = responseJson["routes"];
-                  var distance =
-                      (routes[0]["legs"][0]["distance"]["value"].toInt() / 1000)
-                          .round();
-                  var polyString =
-                      routes[0]["overview_polyline"]["points"].toString();
-                  var latStart = locData.loc.lattidute;
-                  var longStart = locData.loc.longitude;
-
-                  jsonParam = {
-                    "car": {
-                      "id": carData.car.id,
-                      "currentBatteryPercentage":
-                          carData.car.currentBattery.toInt()
-                    },
-                    "route": {
-                      "length": "$distance",
-                      "starting": {
-                        "latitude": "$latStart",
-                        "longitude": "$longStart"
-                      },
-                      "polyline": "$polyString"
-                    }
-                  };
-
-                  Map<String, String> requestHeaders = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                  };
-                  var msg = jsonEncode(jsonParam);
-
-                  var url2 =
-                      "http://finalgphbackend-env.eba-8z7mhh3u.eu-west-1.elasticbeanstalk.com/poi";
-
-                  var response2 =
-                      await http.post(url2, body: msg, headers: requestHeaders);
-
-                  print("sasasasa");
-                  print(response2.statusCode);
-                  print(response2.body);
-                  print(response2);
-                  print("sadfasfdaswfdafasef");
-                  List<dynamic> responseJson2 = json.decode(response2.body);
-                  print(responseJson2);
+                  const dir_url =
+                      "https://www.google.com/maps/dir/?api=1&origin=Google+Pyrmont+NSW&destination=QVB&destination_place_id=ChIJISz8NjyuEmsRFTQ9Iw7Ear8&travelmode=walking";
+                  var responseDir = await http.get(dir_url);
+                  //Map<String, dynamic> jsonResp = json.decode(responseDir.body);
+                  //print(jsonResp);
                 },
                 child: Icon(
                   Icons.person,
