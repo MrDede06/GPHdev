@@ -123,11 +123,8 @@ class _SearchFormState extends State<SearchForm> {
 
       setState(() {
         addesIsSelected = true;
+        loc.updateLocSource(lat, lng, p.description);
       });
-      loc.updateLocSource(lat, lng);
-      print(p.description);
-      print(lat);
-      print(lng);
     }
   }
 
@@ -147,11 +144,8 @@ class _SearchFormState extends State<SearchForm> {
 
       setState(() {
         addesIsSelectedDest = true;
+        loc.updateLocDest(lat, lng, p.description);
       });
-      loc.updateLocDest(lat, lng);
-      print(p.description);
-      print(lat);
-      print(lng);
     }
   }
 }

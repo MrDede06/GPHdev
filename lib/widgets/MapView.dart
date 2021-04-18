@@ -66,12 +66,10 @@ class _MapView extends State<MapView> {
     final carData = Provider.of<CarProvider>(context);
     var media = MediaQuery.of(context);
     double appBarheight = Scaffold.of(context).appBarMaxHeight;
+    final scaffold = Scaffold.of(context);
     if (_checkIfParamatersSelected(locData, carData) == true) {
-      _getBackEndParameters(locData, carData);
+      _getBackEndParameters(locData, carData, scaffold);
       print("count debug");
-      // _createPolylines(locData.loc.lattidute, locData.loc.longitude,
-      //   locData.loc.lattiduteDest, locData.loc.longitudeDest, locData);
-
       locData.loc.isSelected = true;
     }
 
@@ -224,8 +222,8 @@ class _MapView extends State<MapView> {
     });
   }
 
-  Future<void> _getBackEndParameters(
-      LocationProvider locData, CarProvider carData) async {
+  Future<void> _getBackEndParameters(LocationProvider locData,
+      CarProvider carData, ScaffoldState scaffold) async {
     setState(() {
       isLoading = true;
     });
@@ -264,93 +262,110 @@ class _MapView extends State<MapView> {
 
     var url2 =
         "http://finalgphbackend-env.eba-8z7mhh3u.eu-west-1.elasticbeanstalk.com/poi";
+    try {
+      var response2 = await http.post(url2, body: msg, headers: requestHeaders);
 
-    var response2 = await http.post(url2, body: msg, headers: requestHeaders);
+      print("debug stuff");
+      print(response2.statusCode);
+      print(response2.reasonPhrase);
+      print("debug stuff end");
 
-    print("debug stuff");
-    print(response2.statusCode);
-    print(response2.reasonPhrase);
-    print("debug stuff end");
+      List<dynamic> responseJson2 = json.decode(response2.body);
+      print("backedresponse:");
+      print(responseJson2);
+      print("============================");
+      int i = 0;
 
-    List<dynamic> responseJson2 = json.decode(response2.body);
-    print("backedresponse:");
-    print(responseJson2);
-    print("============================");
-    int i = 0;
+      funcPolyCoordinates
+          .add(PointLatLng(locData.loc.lattidute, locData.loc.longitude));
+      while (i < responseJson2.length) {
+        markerLocations.add(LatLng(responseJson2[i]["AddressInfo"]["Latitude"],
+            responseJson2[i]["AddressInfo"]["Longitude"]));
 
-    funcPolyCoordinates
-        .add(PointLatLng(locData.loc.lattidute, locData.loc.longitude));
-    while (i < responseJson2.length) {
-      markerLocations.add(LatLng(responseJson2[i]["AddressInfo"]["Latitude"],
-          responseJson2[i]["AddressInfo"]["Longitude"]));
-
-      funcPolyCoordinates.add(PointLatLng(
-          responseJson2[i]["AddressInfo"]["Latitude"],
-          responseJson2[i]["AddressInfo"]["Longitude"]));
-      i++;
-    }
-    funcPolyCoordinates
-        .add(PointLatLng(locData.loc.lattiduteDest, locData.loc.longitudeDest));
-    final Uint8List markerIcon =
-        await getBytesFromAsset('assets/images/marker.png');
-    for (LatLng markerLocation in markerLocations) {
+        funcPolyCoordinates.add(PointLatLng(
+            responseJson2[i]["AddressInfo"]["Latitude"],
+            responseJson2[i]["AddressInfo"]["Longitude"]));
+        i++;
+      }
+      funcPolyCoordinates.add(
+          PointLatLng(locData.loc.lattiduteDest, locData.loc.longitudeDest));
+      final Uint8List markerIcon =
+          await getBytesFromAsset('assets/images/marker.png');
+      for (LatLng markerLocation in markerLocations) {
+        setState(() {
+          markers.add(
+            Marker(
+                markerId: MarkerId(
+                    markerLocations.indexOf(markerLocation).toString()),
+                position: markerLocation,
+                icon: BitmapDescriptor.fromBytes(markerIcon)),
+          );
+        });
+      }
       setState(() {
-        markers.add(
-          Marker(
-              markerId:
-                  MarkerId(markerLocations.indexOf(markerLocation).toString()),
-              position: markerLocation,
-              icon: BitmapDescriptor.fromBytes(markerIcon)),
-        );
+        addMarker(locData.loc.lattidute, locData.loc.longitude,
+            locData.loc.lattiduteDest, locData.loc.longitudeDest);
       });
+
+      final GoogleMapController controller = await _controller.future;
+      List<LatLng> _targetCord = [
+        LatLng(locData.loc.lattidute, locData.loc.longitude),
+        LatLng(locData.loc.lattiduteDest, locData.loc.longitudeDest)
+      ];
+      controller.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          boundsFromLatLngList(_targetCord),
+          70.0, // padding
+        ),
+      );
+      print("get back end parameters");
+      _createPolylines(
+          locData.loc.lattidute,
+          locData.loc.longitude,
+          locData.loc.lattiduteDest,
+          locData.loc.longitudeDest,
+          locData,
+          funcPolyCoordinates);
+
+      String finalUrl = returnUrl(
+          markerLocations,
+          locData.loc.lattidute,
+          locData.loc.longitude,
+          locData.loc.lattiduteDest,
+          locData.loc.longitudeDest);
+
+      var responseFinal = await http.get(finalUrl);
+      Map<String, dynamic> responseJsonFinal = json.decode(responseFinal.body);
+      List<dynamic> routesFinal = responseJsonFinal["routes"];
+      var distanceFinal =
+          (routesFinal[0]["legs"][0]["distance"]["value"].toInt() / 1000)
+              .round();
+      var duration = routesFinal[0]["legs"][0]["duration"]["value"].toInt();
+
+      setState(() {
+        durationPanel = _printDuration(Duration(seconds: duration));
+        distancePanel = "$distanceFinal km";
+        isLoading = false;
+      });
+
+      print("disatnce is : $distancePanel");
+      print("duration is : $durationPanel");
+    } catch (error) {
+      print(error);
+      setState(() {
+        isLoading = false;
+      });
+      scaffold.showSnackBar(
+        SnackBar(
+          duration: Duration(seconds: 10),
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            'Route is not found with selected parameters. Please try to change current battery and search again!',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
-    setState(() {
-      addMarker(locData.loc.lattidute, locData.loc.longitude,
-          locData.loc.lattiduteDest, locData.loc.longitudeDest);
-    });
-
-    final GoogleMapController controller = await _controller.future;
-    List<LatLng> _targetCord = [
-      LatLng(locData.loc.lattidute, locData.loc.longitude),
-      LatLng(locData.loc.lattiduteDest, locData.loc.longitudeDest)
-    ];
-    controller.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        boundsFromLatLngList(_targetCord),
-        70.0, // padding
-      ),
-    );
-    print("get back end parameters");
-    _createPolylines(
-        locData.loc.lattidute,
-        locData.loc.longitude,
-        locData.loc.lattiduteDest,
-        locData.loc.longitudeDest,
-        locData,
-        funcPolyCoordinates);
-
-    String finalUrl = returnUrl(
-        markerLocations,
-        locData.loc.lattidute,
-        locData.loc.longitude,
-        locData.loc.lattiduteDest,
-        locData.loc.longitudeDest);
-
-    var responseFinal = await http.get(finalUrl);
-    Map<String, dynamic> responseJsonFinal = json.decode(responseFinal.body);
-    List<dynamic> routesFinal = responseJsonFinal["routes"];
-    var distanceFinal =
-        (routesFinal[0]["legs"][0]["distance"]["value"].toInt() / 1000).round();
-    var duration = routesFinal[0]["legs"][0]["duration"]["value"].toInt();
-
-    setState(() {
-      durationPanel = _printDuration(Duration(seconds: duration));
-      distancePanel = "$distanceFinal km";
-      isLoading = false;
-    });
-
-    print("disatnce is : $distancePanel");
-    print("duration is : $durationPanel");
   }
 
   bool _checkIfParamatersSelected(

@@ -171,21 +171,6 @@ class _CarSearchState extends State<CarSearch> {
                 SizedBox(
                   height: 15,
                 ),
-                /*
-                _checkIfParamatersSelected(locData, carData) == true
-                    ? Center(
-                        child: Bounce(
-                          child: Icon(Icons.search),
-                          duration: Duration(milliseconds: 100),
-                          onPressed: () {
-                            setState(() {
-                              locData.toggleSelected();
-                              carData.toggleIsCarSelected();
-                            });
-                          },
-                        ),
-                      )
-                    : Container() */
               ],
             ),
           ),
