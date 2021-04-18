@@ -14,7 +14,7 @@ class _InfoTabMenusState extends State<InfoTabMenus>
     final carData = Provider.of<CarProvider>(context);
     return Container(
         child: DefaultTabController(
-      length: 3,
+      length: 2,
       child: Expanded(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -32,11 +32,6 @@ class _InfoTabMenusState extends State<InfoTabMenus>
                   Tab(
                       icon: Icon(
                     Icons.charging_station_rounded,
-                    color: Colors.black54,
-                  )),
-                  Tab(
-                      icon: Icon(
-                    Icons.self_improvement_sharp,
                     color: Colors.black54,
                   )),
                 ],
@@ -74,19 +69,13 @@ class _InfoTabMenusState extends State<InfoTabMenus>
                             _getRowWithDivider("Connectors: " +
                                 carData.car.connectors.toString()),
                             _getRowWithDivider("Current battery: " +
-                                carData.car.currentBattery.toString() +
+                                carData.car.currentBattery.toInt().toString() +
                                 " %"),
                           ],
                         )),
                   Center(
                     child: Text(
                       "Charge Station Body",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                  Center(
-                    child: Text(
-                      "Fuck Body :)",
                       style: TextStyle(color: Colors.black),
                     ),
                   ),

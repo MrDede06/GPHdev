@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:stateTrial/providers/CarProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,6 +10,9 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:progress_indicators/progress_indicators.dart';
+import 'package:flutter_mapbox_navigation/library.dart';
+import 'dart:ui' as ui;
+import 'dart:typed_data';
 
 class MapView extends StatefulWidget {
   @override
@@ -29,6 +33,28 @@ class _MapView extends State<MapView> {
   List<PointLatLng> funcPolyCoordinates = [];
   List<LatLng> realpolylineCoordinates = [];
   bool isLoading = false;
+
+  //mapboxpart
+  String _platformVersion = 'Unknown';
+  String _instruction = "";
+  MapBoxNavigation _directions;
+  MapBoxOptions _options;
+
+  bool _arrived = false;
+  bool _isMultipleStop = false;
+  double _distanceRemaining, _durationRemaining;
+  MapBoxNavigationViewController _controllerBox;
+  bool _routeBuilt = false;
+  bool _isNavigating = false;
+
+  var wayPoints = List<WayPoint>();
+
+  @override
+  void initState() {
+    super.initState();
+    initialize();
+  }
+  //mapboxpartend
 
   final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(51.107883, 17.038538),
@@ -98,8 +124,19 @@ class _MapView extends State<MapView> {
                               ],
                             ),
                             duration: Duration(milliseconds: 100),
-                            onPressed: () {
-                              print("navigation");
+                            onPressed: () async {
+                              int i = 0;
+                              int y = 1;
+                              while (i < funcPolyCoordinates.length) {
+                                wayPoints.add(WayPoint(
+                                    latitude: funcPolyCoordinates[i].latitude,
+                                    longitude: funcPolyCoordinates[i].longitude,
+                                    name: "Destinayion $y)"));
+                                i++;
+                                y++;
+                              }
+                              await _directions.startNavigation(
+                                  wayPoints: wayPoints, options: _options);
                             }),
                       )
                     ],
@@ -236,8 +273,9 @@ class _MapView extends State<MapView> {
     print("debug stuff end");
 
     List<dynamic> responseJson2 = json.decode(response2.body);
-
-    //print(responseJson2.length);
+    print("backedresponse:");
+    print(responseJson2);
+    print("============================");
     int i = 0;
 
     funcPolyCoordinates
@@ -253,7 +291,8 @@ class _MapView extends State<MapView> {
     }
     funcPolyCoordinates
         .add(PointLatLng(locData.loc.lattiduteDest, locData.loc.longitudeDest));
-
+    final Uint8List markerIcon =
+        await getBytesFromAsset('assets/images/marker.png');
     for (LatLng markerLocation in markerLocations) {
       setState(() {
         markers.add(
@@ -261,7 +300,7 @@ class _MapView extends State<MapView> {
               markerId:
                   MarkerId(markerLocations.indexOf(markerLocation).toString()),
               position: markerLocation,
-              icon: BitmapDescriptor.fromAsset("assets/images/marker.png")),
+              icon: BitmapDescriptor.fromBytes(markerIcon)),
         );
       });
     }
@@ -401,5 +440,95 @@ class _MapView extends State<MapView> {
 
   String _printDuration(Duration duration) {
     return "${duration.inHours}h ${duration.inMinutes.remainder(60)}min";
+  }
+
+  Future<void> _onRouteEvent(e) async {
+    _distanceRemaining = await _directions.distanceRemaining;
+    _durationRemaining = await _directions.durationRemaining;
+
+    switch (e.eventType) {
+      case MapBoxEvent.progress_change:
+        var progressEvent = e.data as RouteProgressEvent;
+        _arrived = progressEvent.arrived;
+        if (progressEvent.currentStepInstruction != null)
+          _instruction = progressEvent.currentStepInstruction;
+        break;
+      case MapBoxEvent.route_building:
+      case MapBoxEvent.route_built:
+        _routeBuilt = true;
+        break;
+      case MapBoxEvent.route_build_failed:
+        _routeBuilt = false;
+        break;
+      case MapBoxEvent.navigation_running:
+        _isNavigating = true;
+        break;
+      case MapBoxEvent.on_arrival:
+        _arrived = true;
+        if (!_isMultipleStop) {
+          await Future.delayed(Duration(seconds: 3));
+          await _controllerBox.finishNavigation();
+        } else {}
+        break;
+      case MapBoxEvent.navigation_finished:
+      case MapBoxEvent.navigation_cancelled:
+        _routeBuilt = false;
+        _isNavigating = false;
+        break;
+      default:
+        break;
+    }
+    //refresh UI
+    setState(() {});
+  }
+
+  Future<void> initialize() async {
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    _directions = MapBoxNavigation(onRouteEvent: _onRouteEvent);
+    _options = MapBoxOptions(
+        //initialLatitude: 36.1175275,
+        //initialLongitude: -115.1839524,
+        zoom: 15.0,
+        tilt: 0.0,
+        bearing: 0.0,
+        enableRefresh: false,
+        alternatives: true,
+        voiceInstructionsEnabled: true,
+        bannerInstructionsEnabled: true,
+        allowsUTurnAtWayPoints: true,
+        mode: MapBoxNavigationMode.driving,
+        units: VoiceUnits.imperial,
+        simulateRoute: false,
+        animateBuildRoute: true,
+        longPressDestinationEnabled: true,
+        language: "en");
+    /*
+    String platformVersion;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      platformVersion = await _directions.platformVersion;
+    } on PlatformException {
+      platformVersion = 'Failed to get platform version.';
+    }
+
+    setState(() {
+      _platformVersion = platformVersion;
+    });
+    */
+  }
+
+  Future<Uint8List> getBytesFromAsset(String path) async {
+    double pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: pixelRatio.round() * 30);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))
+        .buffer
+        .asUint8List();
   }
 }

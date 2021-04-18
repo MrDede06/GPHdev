@@ -4,6 +4,15 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+        <string>location</string>
+    </array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>MGLMapboxAccessToken</key>
+	<string>pk.eyJ1Ijoib3pndXJkZWRlIiwiYSI6ImNrbmRpMWR4MTBvaGkydm83ajN2OTJ3OG4ifQ.aFAesxZOddgi7YTNlYTo2Q</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
