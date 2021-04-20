@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stateTrial/providers/CarProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:stateTrial/providers/LocationProvider.dart';
+import 'package:stateTrial/providers/ChargeStationProvider.dart';
 
 class InfoTabMenus extends StatefulWidget {
   @override
@@ -14,6 +15,8 @@ class _InfoTabMenusState extends State<InfoTabMenus>
   Widget build(BuildContext context) {
     final carData = Provider.of<CarProvider>(context);
     final locData = Provider.of<LocationProvider>(context);
+    final stationData = Provider.of<ChargeStationProvider>(context);
+    final List<ChargeStation> stations = stationData.stations;
     return Container(
         child: DefaultTabController(
       length: 2,
@@ -100,11 +103,22 @@ class _InfoTabMenusState extends State<InfoTabMenus>
                                     " %"),
                           ],
                         )),
-                  Center(
-                    child: Text(
-                      "Charge Station Body",
-                      style: TextStyle(color: Colors.black),
-                    ),
+                  Container(
+                    child: ListView.builder(
+                        itemCount: stations.length,
+                        itemBuilder: (_, i) => Column(
+                              children: <Widget>[
+                                Text("Title is: " + stations[i].stationTitle),
+                                Text("Address is: " + stations[i].address),
+                                Text("number of connectors: " +
+                                    stations[i].numConnectors.toString()),
+                                Text("Connectors: " +
+                                    stations[i].connectors.toString()),
+                                SizedBox(
+                                  height: 20,
+                                )
+                              ],
+                            )),
                   ),
                 ]),
               ),

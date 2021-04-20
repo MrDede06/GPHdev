@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:stateTrial/providers/CarProvider.dart';
+import 'package:stateTrial/providers/ChargeStationProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:stateTrial/providers/LocationProvider.dart';
@@ -33,6 +34,7 @@ class _MapView extends State<MapView> {
   List<PointLatLng> funcPolyCoordinates = [];
   List<LatLng> realpolylineCoordinates = [];
   bool isLoading = false;
+  List<ChargeStationProvider> stations = [];
 
   //mapboxpart
   String _platformVersion = 'Unknown';
@@ -64,11 +66,12 @@ class _MapView extends State<MapView> {
   Widget build(BuildContext context) {
     final locData = Provider.of<LocationProvider>(context);
     final carData = Provider.of<CarProvider>(context);
+    final stationData = Provider.of<ChargeStationProvider>(context);
     var media = MediaQuery.of(context);
     double appBarheight = Scaffold.of(context).appBarMaxHeight;
     final scaffold = Scaffold.of(context);
     if (_checkIfParamatersSelected(locData, carData) == true) {
-      _getBackEndParameters(locData, carData, scaffold);
+      _getBackEndParameters(locData, carData, scaffold, stationData);
       print("count debug");
       locData.loc.isSelected = true;
     }
@@ -222,8 +225,11 @@ class _MapView extends State<MapView> {
     });
   }
 
-  Future<void> _getBackEndParameters(LocationProvider locData,
-      CarProvider carData, ScaffoldState scaffold) async {
+  Future<void> _getBackEndParameters(
+      LocationProvider locData,
+      CarProvider carData,
+      ScaffoldState scaffold,
+      ChargeStationProvider stationData) async {
     setState(() {
       isLoading = true;
     });
@@ -262,29 +268,39 @@ class _MapView extends State<MapView> {
 
     var url2 =
         "http://finalgphbackend-env.eba-8z7mhh3u.eu-west-1.elasticbeanstalk.com/poi";
+
     try {
       var response2 = await http.post(url2, body: msg, headers: requestHeaders);
-
-      print("debug stuff");
-      print(response2.statusCode);
-      print(response2.reasonPhrase);
-      print("debug stuff end");
-
       List<dynamic> responseJson2 = json.decode(response2.body);
-      print("backedresponse:");
-      print(responseJson2);
-      print("============================");
+      int k = 0;
+      while (k < responseJson2[0]["Connections"].length) {
+        print(responseJson2[0]["Connections"][k]["ConnectionTypeID"]);
+        k++;
+      }
+
       int i = 0;
 
       funcPolyCoordinates
           .add(PointLatLng(locData.loc.lattidute, locData.loc.longitude));
       while (i < responseJson2.length) {
+        List<int> connectors = [];
+        int y = 0;
         markerLocations.add(LatLng(responseJson2[i]["AddressInfo"]["Latitude"],
             responseJson2[i]["AddressInfo"]["Longitude"]));
 
         funcPolyCoordinates.add(PointLatLng(
             responseJson2[i]["AddressInfo"]["Latitude"],
             responseJson2[i]["AddressInfo"]["Longitude"]));
+        while (y < responseJson2[i]["Connections"].length) {
+          connectors
+              .add(responseJson2[i]["Connections"][y]["ConnectionTypeID"]);
+          y++;
+        }
+        stationData.updateStationProperties(ChargeStation(
+            address: responseJson2[i]["AddressInfo"]["AddressLine1"],
+            stationTitle: responseJson2[i]["AddressInfo"]["Title"],
+            numConnectors: responseJson2[i]["Connections"].length,
+            connectors: connectors));
         i++;
       }
       funcPolyCoordinates.add(

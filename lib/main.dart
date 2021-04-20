@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:stateTrial/providers/ChargeStationProvider.dart';
 import 'package:stateTrial/providers/LocationProvider.dart';
 import 'package:stateTrial/providers/CarProvider.dart';
 import 'package:stateTrial/screens/SplashScreen.dart';
@@ -23,6 +24,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider.value(
           value: CarProvider(),
+        ),
+        ChangeNotifierProvider.value(
+          value: ChargeStationProvider(),
         ),
       ],
       child: MaterialApp(
