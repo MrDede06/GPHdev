@@ -108,12 +108,15 @@ class _InfoTabMenusState extends State<InfoTabMenus>
                         itemCount: stations.length,
                         itemBuilder: (_, i) => Column(
                               children: <Widget>[
-                                Text("Title is: " + stations[i].stationTitle),
-                                Text("Address is: " + stations[i].address),
-                                Text("number of connectors: " +
+                                _getRowWithDividerBold(
+                                    "Charge Station ${i + 1}: " +
+                                        stations[i].stationTitle),
+                                _getRowWithDivider(
+                                    "Address: " + stations[i].address),
+                                _getRowWithDivider("Number of connectors: " +
                                     stations[i].numConnectors.toString()),
-                                Text("Connectors: " +
-                                    stations[i].connectors.toString()),
+                                _getRowWithDivider("Connectors: " +
+                                    _convertFromMap(stations[i].connectors)),
                                 SizedBox(
                                   height: 20,
                                 )
@@ -132,6 +135,22 @@ class _InfoTabMenusState extends State<InfoTabMenus>
   Widget _getRowWithDivider(String text) {
     var children = <Widget>[
       new Padding(padding: new EdgeInsets.all(10.0), child: new Text(text)),
+      new Divider(height: 5.0),
+    ];
+
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
+    );
+  }
+
+  Widget _getRowWithDividerBold(String text) {
+    var children = <Widget>[
+      new Padding(
+        padding: new EdgeInsets.all(10.0),
+        child: new Text(text,
+            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+      ),
       new Divider(height: 5.0),
     ];
 
@@ -164,5 +183,26 @@ class _InfoTabMenusState extends State<InfoTabMenus>
       return true;
     else
       return false;
+  }
+
+  String _convertFromMap(List<int> connectors) {
+    String finalstr = "";
+    List<String> listStr = [];
+
+    for (int i in connectors) {
+      if (i == 1)
+        listStr.add("Type1");
+      else if (i == 2)
+        listStr.add("CHAdeMO");
+      else if (i == 25)
+        listStr.add("Type 2(socket only)");
+      else if (i == 1036)
+        listStr.add("Type 2(tethered id)");
+      else if (i == 32)
+        listStr.add("CCS Type-1");
+      else
+        listStr.add("CCS Type-2");
+    }
+    return listStr.toString();
   }
 }

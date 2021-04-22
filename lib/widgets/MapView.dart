@@ -273,13 +273,12 @@ class _MapView extends State<MapView> {
       var response2 = await http.post(url2, body: msg, headers: requestHeaders);
       List<dynamic> responseJson2 = json.decode(response2.body);
       int k = 0;
-      while (k < responseJson2[0]["Connections"].length) {
-        print(responseJson2[0]["Connections"][k]["ConnectionTypeID"]);
+      while (k < responseJson2[k]["Connections"].length) {
+        print(responseJson2[k]);
         k++;
       }
 
       int i = 0;
-
       funcPolyCoordinates
           .add(PointLatLng(locData.loc.lattidute, locData.loc.longitude));
       while (i < responseJson2.length) {
