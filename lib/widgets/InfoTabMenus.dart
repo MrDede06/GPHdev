@@ -115,8 +115,9 @@ class _InfoTabMenusState extends State<InfoTabMenus>
                                     "Address: " + stations[i].address),
                                 _getRowWithDivider("Number of connectors: " +
                                     stations[i].numConnectors.toString()),
-                                _getRowWithDivider("Connectors: " +
-                                    _convertFromMap(stations[i].connectors)),
+                                /*    _getRowWithDivider("Connectors: " +
+                                    _convertFromMap(stations[i].connectors)), */
+                                _getRowWithDivider("Connectors: "),
                                 SizedBox(
                                   height: 20,
                                 )

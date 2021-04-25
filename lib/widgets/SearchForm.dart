@@ -59,6 +59,7 @@ class _SearchFormState extends State<SearchForm> {
                     displayPrediction(p, locData);
                     setState(() {
                       addressPred = p;
+                      locData.loc.isSelected = false;
                     });
                   },
                 ),
@@ -78,6 +79,7 @@ class _SearchFormState extends State<SearchForm> {
                     displayPredictionDest(p, locData);
                     setState(() {
                       addressPredDest = p;
+                      locData.loc.isSelected = false;
                     });
                   },
                 ),

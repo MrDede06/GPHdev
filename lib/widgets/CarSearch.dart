@@ -109,6 +109,7 @@ class _CarSearchState extends State<CarSearch> {
                   onChanged: (newValue) {
                     setState(() {
                       value = newValue;
+                      locData.loc.isSelected = false;
                     });
 
                     final selectedCar = loadedData
@@ -165,6 +166,7 @@ class _CarSearchState extends State<CarSearch> {
                       onChangeEnd: (double value) {
                         setState(() {
                           carData.updateCurrentBattery(value);
+                          locData.loc.isSelected = false;
                         });
                       }),
                 ),

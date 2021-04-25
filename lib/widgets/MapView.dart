@@ -71,6 +71,16 @@ class _MapView extends State<MapView> {
     double appBarheight = Scaffold.of(context).appBarMaxHeight;
     final scaffold = Scaffold.of(context);
     if (_checkIfParamatersSelected(locData, carData) == true) {
+      funcPolyCoordinates.clear();
+      markers.clear();
+      _polylines.clear();
+      polylines.clear();
+      polylineCoordinates.clear();
+      realpolylineCoordinates.clear();
+      stations.clear();
+      totalCordCollection.clear();
+      markerLocations.clear();
+
       _getBackEndParameters(locData, carData, scaffold, stationData);
       print("count debug");
       locData.loc.isSelected = true;
@@ -167,6 +177,7 @@ class _MapView extends State<MapView> {
   }
 
   void addMarker(double lat, double long, double latDest, double longDest) {
+    // markers.clear();
     Marker sourcetMarker = Marker(
       markerId: MarkerId("id"),
       position: LatLng(lat, long),
@@ -272,12 +283,6 @@ class _MapView extends State<MapView> {
     try {
       var response2 = await http.post(url2, body: msg, headers: requestHeaders);
       List<dynamic> responseJson2 = json.decode(response2.body);
-      int k = 0;
-      while (k < responseJson2[k]["Connections"].length) {
-        print(responseJson2[k]);
-        k++;
-      }
-
       int i = 0;
       funcPolyCoordinates
           .add(PointLatLng(locData.loc.lattidute, locData.loc.longitude));

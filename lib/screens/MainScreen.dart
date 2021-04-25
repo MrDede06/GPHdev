@@ -48,11 +48,7 @@ class MainScreen extends StatelessWidget {
             Bounce(
                 duration: Duration(milliseconds: 100),
                 onPressed: () async {
-                  const dir_url =
-                      "https://www.google.com/maps/dir/?api=1&origin=Google+Pyrmont+NSW&destination=QVB&destination_place_id=ChIJISz8NjyuEmsRFTQ9Iw7Ear8&travelmode=walking";
-                  var responseDir = await http.get(dir_url);
-                  //Map<String, dynamic> jsonResp = json.decode(responseDir.body);
-                  //print(jsonResp);
+                  locData.loc.isSelected = false;
                 },
                 child: Icon(
                   Icons.person,
