@@ -80,10 +80,10 @@ class _MapView extends State<MapView> {
       stations.clear();
       totalCordCollection.clear();
       markerLocations.clear();
-
       _getBackEndParameters(locData, carData, scaffold, stationData);
       print("count debug");
-      locData.loc.isSelected = true;
+
+      locData.loc.isSelected = false;
     }
 
     return Stack(
@@ -98,7 +98,7 @@ class _MapView extends State<MapView> {
           },
           markers: markers,
         ),
-        (distancePanel != "" && durationPanel != "")
+        (distancePanel != "" && durationPanel != "") && isLoading != true
             ? Container(
                 child: Card(
                   child: Row(
@@ -142,7 +142,7 @@ class _MapView extends State<MapView> {
                                 wayPoints.add(WayPoint(
                                     latitude: funcPolyCoordinates[i].latitude,
                                     longitude: funcPolyCoordinates[i].longitude,
-                                    name: "Destinayion $y)"));
+                                    name: "Destination $y)"));
                                 i++;
                                 y++;
                               }
@@ -199,14 +199,10 @@ class _MapView extends State<MapView> {
       double longtiduteDest,
       LocationProvider data,
       List<PointLatLng> funcPolyCoordinates) async {
-    // Initializing PolylinePoints
+    print("creating polylines");
+    print("===================");
     polylinePoints = PolylinePoints();
-
-    // Generating the list of coordinates to be used for
-    // drawing the polylines
     int i = 0;
-    print(funcPolyCoordinates.length);
-    print(funcPolyCoordinates);
     while (i < funcPolyCoordinates.length - 1) {
       PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o', // Google Maps API Key
@@ -219,9 +215,7 @@ class _MapView extends State<MapView> {
       totalCordCollection += result.points;
       i++;
     }
-    //print(result.points);
-    // Adding the coordinates to the list
-    print("create polyline");
+
     if (totalCordCollection.isNotEmpty) {
       totalCordCollection.forEach((PointLatLng point) {
         polylineCoordinates.add(LatLng(point.latitude, point.longitude));
@@ -278,7 +272,7 @@ class _MapView extends State<MapView> {
     var msg = jsonEncode(jsonParam);
 
     var url2 =
-        "http://finalgphbackend-env.eba-8z7mhh3u.eu-west-1.elasticbeanstalk.com/poi";
+        "http://gphbackendfinal-env.eba-7uwmhxbb.eu-west-1.elasticbeanstalk.com/poi";
 
     try {
       var response2 = await http.post(url2, body: msg, headers: requestHeaders);
@@ -366,15 +360,15 @@ class _MapView extends State<MapView> {
         durationPanel = _printDuration(Duration(seconds: duration));
         distancePanel = "$distanceFinal km";
         isLoading = false;
+        //  carData.car.isCarSelected = false;
+        carData.toggleIsCarSelected();
       });
-
-      print("disatnce is : $distancePanel");
-      print("duration is : $durationPanel");
     } catch (error) {
-      print(error);
       setState(() {
         isLoading = false;
+        carData.toggleIsCarSelected();
       });
+      print(error);
       scaffold.showSnackBar(
         SnackBar(
           duration: Duration(seconds: 10),
@@ -394,7 +388,7 @@ class _MapView extends State<MapView> {
         locData.loc.lattiduteDest != 51.5266 &&
         carData.car.id != 1 &&
         carData.car.currentBattery != 0 &&
-        locData.loc.isSelected == false)
+        locData.loc.isSelected == true)
       return true;
     else
       return false;

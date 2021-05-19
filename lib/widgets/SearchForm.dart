@@ -5,6 +5,8 @@ import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 import 'dart:async';
+import 'package:progress_indicators/progress_indicators.dart';
+import 'package:stateTrial/providers/CarProvider.dart';
 
 class SearchForm extends StatefulWidget {
   @override
@@ -20,6 +22,7 @@ class _SearchFormState extends State<SearchForm> {
   @override
   Widget build(BuildContext context) {
     final locData = Provider.of<LocationProvider>(context);
+    final carData = Provider.of<CarProvider>(context);
     final mediaQuery = MediaQuery.of(context);
     return Container(
       width: double.infinity,
@@ -59,7 +62,7 @@ class _SearchFormState extends State<SearchForm> {
                     displayPrediction(p, locData);
                     setState(() {
                       addressPred = p;
-                      locData.loc.isSelected = false;
+                      //locData.loc.isSelected = false;
                     });
                   },
                 ),
@@ -79,7 +82,7 @@ class _SearchFormState extends State<SearchForm> {
                     displayPredictionDest(p, locData);
                     setState(() {
                       addressPredDest = p;
-                      locData.loc.isSelected = false;
+                      //  locData.loc.isSelected = false;
                     });
                   },
                 ),

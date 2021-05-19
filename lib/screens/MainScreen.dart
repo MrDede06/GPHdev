@@ -10,16 +10,12 @@ import '../widgets/MapView.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/CarSearch.dart';
 import 'package:stateTrial/providers/CarProvider.dart';
-import 'package:http/http.dart' as http;
 
 class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locData = Provider.of<LocationProvider>(context);
     final carData = Provider.of<CarProvider>(context);
-    String url;
-    double sourceLat, sourceLong, destLat, destLong;
-    var jsonParam;
 
     Future<void> _launchURL() async {
       const url =
