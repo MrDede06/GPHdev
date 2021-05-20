@@ -115,7 +115,7 @@ class _SearchFormState extends State<SearchForm> {
     setState(() {
       addesIsSelected = false;
     });
-
+    print(p);
     if (p != null) {
       GoogleMapsPlaces _places = GoogleMapsPlaces(
         apiKey: 'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o',

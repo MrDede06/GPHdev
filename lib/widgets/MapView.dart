@@ -315,7 +315,7 @@ class _MapView extends State<MapView> {
 
     Map<String, String> requestHeaders = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      'Accept': 'application/json; charset=UTF-8',
     };
     var msg = jsonEncode(jsonParam);
 
@@ -325,7 +325,6 @@ class _MapView extends State<MapView> {
     try {
       var response2 = await http.post(url2, body: msg, headers: requestHeaders);
       List<dynamic> responseJson2 = json.decode(response2.body);
-      print(responseJson2);
       print(responseJson2.length);
       int i = 0;
       funcPolyCoordinates

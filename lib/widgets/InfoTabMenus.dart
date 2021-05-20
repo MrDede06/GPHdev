@@ -112,13 +112,9 @@ class _InfoTabMenusState extends State<InfoTabMenus>
                               children: <Widget>[
                                 _getRowWithDividerBold(
                                     "Charge Station ${i + 1}: " +
-                                        utf8
-                                            .encode(stations[i].stationTitle)
-                                            .toString()),
+                                        stations[i].stationTitle.toString()),
                                 _getRowWithDivider("Address: " +
-                                    utf8
-                                        .encode(stations[i].address)
-                                        .toString()),
+                                    stations[i].address.toString()),
                                 _getRowWithDivider("Number of connectors: " +
                                     stations[i].numConnectors.toString()),
                                 _getRowWithDivider("Connectors: " +
