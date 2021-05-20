@@ -230,6 +230,54 @@ class _MapView extends State<MapView> {
     });
   }
 
+  Future<void> _createPolylinesforError(double lattidute, double longtidute,
+      double latiduteDest, double longtiduteDest) async {
+    polylinePoints = PolylinePoints();
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      'AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o', // Google Maps API Key
+      PointLatLng(lattidute, longtidute),
+      PointLatLng(latiduteDest, longtiduteDest),
+      travelMode: TravelMode.driving,
+    );
+    totalCordCollection = result.points;
+    if (totalCordCollection.isNotEmpty) {
+      totalCordCollection.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+    }
+    setState(() {
+      Polyline polyline = Polyline(
+          polylineId: PolylineId("poly"),
+          color: Color.fromARGB(255, 40, 122, 198),
+          points: polylineCoordinates);
+      _polylines.add(polyline);
+    });
+    Marker sourcetMarker = Marker(
+      markerId: MarkerId("id"),
+      position: LatLng(lattidute, longtidute),
+    );
+    Marker destMarker = Marker(
+      markerId: MarkerId("id2"),
+      position: LatLng(latiduteDest, longtiduteDest),
+    );
+    // Add it to Set
+
+    markers.add(sourcetMarker);
+    markers.add(destMarker);
+
+    final GoogleMapController controller = await _controller.future;
+    List<LatLng> _targetCord = [
+      LatLng(lattidute, longtidute),
+      LatLng(latiduteDest, longtiduteDest)
+    ];
+    controller.animateCamera(
+      CameraUpdate.newLatLngBounds(
+        boundsFromLatLngList(_targetCord),
+        70.0, // padding
+      ),
+    );
+  }
+
   Future<void> _getBackEndParameters(
       LocationProvider locData,
       CarProvider carData,
@@ -277,9 +325,12 @@ class _MapView extends State<MapView> {
     try {
       var response2 = await http.post(url2, body: msg, headers: requestHeaders);
       List<dynamic> responseJson2 = json.decode(response2.body);
+      print(responseJson2);
+      print(responseJson2.length);
       int i = 0;
       funcPolyCoordinates
           .add(PointLatLng(locData.loc.lattidute, locData.loc.longitude));
+      stationData.clearStationProperties();
       while (i < responseJson2.length) {
         List<int> connectors = [];
         int y = 0;
@@ -289,16 +340,57 @@ class _MapView extends State<MapView> {
         funcPolyCoordinates.add(PointLatLng(
             responseJson2[i]["AddressInfo"]["Latitude"],
             responseJson2[i]["AddressInfo"]["Longitude"]));
+
         while (y < responseJson2[i]["Connections"].length) {
           connectors
               .add(responseJson2[i]["Connections"][y]["ConnectionTypeID"]);
           y++;
         }
-        stationData.updateStationProperties(ChargeStation(
-            address: responseJson2[i]["AddressInfo"]["AddressLine1"],
-            stationTitle: responseJson2[i]["AddressInfo"]["Title"],
-            numConnectors: responseJson2[i]["Connections"].length,
-            connectors: connectors));
+        if (i == 0) {
+          sourceLat = locData.loc.lattidute;
+          sourceLong = locData.loc.longitude;
+          destLat = responseJson2[i]["AddressInfo"]["Latitude"];
+          destLong = responseJson2[i]["AddressInfo"]["Longitude"];
+          print("$i in the first if");
+        } else if (i == (responseJson2.length - 1)) {
+          sourceLat = responseJson2[responseJson2.length - 2]["AddressInfo"]
+              ["Latitude"];
+          sourceLong = responseJson2[responseJson2.length - 2]["AddressInfo"]
+              ["Longitude"];
+          destLat = responseJson2[responseJson2.length - 1]["AddressInfo"]
+              ["Latitude"];
+          destLong = responseJson2[responseJson2.length - 1]["AddressInfo"]
+              ["Longitude"];
+
+          print("$i in the else if");
+        } else {
+          sourceLat = responseJson2[i - 1]["AddressInfo"]["Latitude"];
+          sourceLong = responseJson2[i - 1]["AddressInfo"]["Longitude"];
+          destLat = responseJson2[i]["AddressInfo"]["Latitude"];
+          destLong = responseJson2[i]["AddressInfo"]["Longitude"];
+          print("$i in the else");
+        }
+
+        var urlCharge =
+            "https://maps.googleapis.com/maps/api/directions/json?origin=$sourceLat,$sourceLong&destination=$destLat,$destLong&key=AIzaSyCdLd1RuWXhZRK-QxroPh7d1ok1n1K6C9o";
+        var responseCharge = await http.get(urlCharge);
+        Map<String, dynamic> responseJsonCharge =
+            json.decode(responseCharge.body);
+        List<dynamic> routesCharge = responseJsonCharge["routes"];
+        setState(() {
+          stationData.updateStationProperties(ChargeStation(
+              distance:
+                  (routesCharge[0]["legs"][0]["distance"]["value"].toInt() /
+                          1000)
+                      .round()
+                      .toString(),
+              duration: routesCharge[0]["legs"][0]["duration"]["value"].toInt(),
+              address: responseJson2[i]["AddressInfo"]["AddressLine1"],
+              stationTitle: responseJson2[i]["AddressInfo"]["Title"],
+              numConnectors: responseJson2[i]["Connections"].length,
+              connectors: connectors));
+        });
+
         i++;
       }
       funcPolyCoordinates.add(
@@ -367,6 +459,7 @@ class _MapView extends State<MapView> {
       setState(() {
         isLoading = false;
         carData.toggleIsCarSelected();
+        stationData.clearStationProperties();
       });
       print(error);
       scaffold.showSnackBar(
@@ -378,6 +471,12 @@ class _MapView extends State<MapView> {
             textAlign: TextAlign.center,
           ),
         ),
+      );
+      _createPolylinesforError(
+        locData.loc.lattidute,
+        locData.loc.longitude,
+        locData.loc.lattiduteDest,
+        locData.loc.longitudeDest,
       );
     }
   }

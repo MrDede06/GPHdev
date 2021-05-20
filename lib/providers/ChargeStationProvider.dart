@@ -3,10 +3,17 @@ import 'package:flutter/material.dart';
 class ChargeStation {
   String stationTitle;
   String address;
+  int duration;
+  String distance;
   int numConnectors;
   List<int> connectors;
   ChargeStation(
-      {this.stationTitle, this.address, this.numConnectors, this.connectors});
+      {this.stationTitle,
+      this.address,
+      this.numConnectors,
+      this.connectors,
+      this.distance,
+      this.duration});
 }
 
 class ChargeStationProvider with ChangeNotifier {
@@ -21,7 +28,9 @@ class ChargeStationProvider with ChangeNotifier {
         address: station.address,
         stationTitle: station.stationTitle,
         numConnectors: station.numConnectors,
-        connectors: station.connectors);
+        connectors: station.connectors,
+        duration: station.duration,
+        distance: station.distance);
     _items.add(newStation);
     notifyListeners();
   }
@@ -36,5 +45,9 @@ class ChargeStationProvider with ChangeNotifier {
       print("connectors: " + _items[i].connectors.toString());
       i++;
     }
+  }
+
+  void clearStationProperties() {
+    _items.clear();
   }
 }

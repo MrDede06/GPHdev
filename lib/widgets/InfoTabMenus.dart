@@ -3,6 +3,7 @@ import 'package:stateTrial/providers/CarProvider.dart';
 import 'package:provider/provider.dart';
 import 'package:stateTrial/providers/LocationProvider.dart';
 import 'package:stateTrial/providers/ChargeStationProvider.dart';
+import 'dart:convert';
 
 class InfoTabMenus extends StatefulWidget {
   @override
@@ -17,6 +18,7 @@ class _InfoTabMenusState extends State<InfoTabMenus>
     final locData = Provider.of<LocationProvider>(context);
     final stationData = Provider.of<ChargeStationProvider>(context);
     final List<ChargeStation> stations = stationData.stations;
+    const Utf8Codec utf8 = Utf8Codec();
     return Container(
         child: DefaultTabController(
       length: 2,
@@ -110,14 +112,23 @@ class _InfoTabMenusState extends State<InfoTabMenus>
                               children: <Widget>[
                                 _getRowWithDividerBold(
                                     "Charge Station ${i + 1}: " +
-                                        stations[i].stationTitle),
-                                _getRowWithDivider(
-                                    "Address: " + stations[i].address),
+                                        utf8
+                                            .encode(stations[i].stationTitle)
+                                            .toString()),
+                                _getRowWithDivider("Address: " +
+                                    utf8
+                                        .encode(stations[i].address)
+                                        .toString()),
                                 _getRowWithDivider("Number of connectors: " +
                                     stations[i].numConnectors.toString()),
-                                /*    _getRowWithDivider("Connectors: " +
-                                    _convertFromMap(stations[i].connectors)), */
-                                _getRowWithDivider("Connectors: "),
+                                _getRowWithDivider("Connectors: " +
+                                    _convertFromMap(stations[i].connectors)),
+                                /*_getRowWithDivider("Connectors: "), */
+                                _getRowWithDivider("Distance: " +
+                                    stations[i].distance +
+                                    " km"),
+                                _getRowWithDivider("Duration: " +
+                                    _printDuration(stations[i].duration)),
                                 SizedBox(
                                   height: 20,
                                 )
@@ -206,4 +217,9 @@ class _InfoTabMenusState extends State<InfoTabMenus>
     }
     return listStr.toString();
   }
+}
+
+String _printDuration(int sec) {
+  final duration = Duration(seconds: sec);
+  return "${duration.inHours}h ${duration.inMinutes.remainder(60)}min";
 }
